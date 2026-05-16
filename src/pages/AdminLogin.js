@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -21,7 +22,6 @@ export default function AdminLogin({ onLogin, onToast }) {
     setLoading(true);
 
     try {
-      // Admin uses Firebase Auth; username input is treated as email.
       const userCredential = await signInWithEmailAndPassword(auth, username, password);
       const token = await userCredential.user.getIdToken();
 
@@ -46,7 +46,7 @@ export default function AdminLogin({ onLogin, onToast }) {
           <div className="badge badgeAdmin">Admin</div>
         </div>
 
-        <form className="formCard" onSubmit={submit}>
+        <form className="authCard" onSubmit={submit}>
           <div className="grid2">
             <label className="field">
               <span className="label">Email</span>
@@ -56,7 +56,7 @@ export default function AdminLogin({ onLogin, onToast }) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 onBlur={() => setTouched((t) => ({ ...t, username: true }))}
-                placeholder="admin@example.com"
+                placeholder="admin@gmail.com"
               />
               {touched.username && usernameError ? (
                 <div className="errorText">Username is required.</div>
@@ -140,10 +140,14 @@ export default function AdminLogin({ onLogin, onToast }) {
               )}
             </button>
           </div>
+          
+          <div style={{ textAlign: 'center', marginTop: '12px' }}>
+            <Link to="/admin/reset-password" style={{ color: 'var(--primary2)', textDecoration: 'none', fontSize: '13px' }}>
+              Forgot password?
+            </Link>
+          </div>
         </form>
       </div>
     </div>
   );
 }
-
-

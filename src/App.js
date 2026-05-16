@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import Toast from './components/Toast';
 import { BrowserRouter, Navigate, Route, Routes, Link } from 'react-router-dom';
 import './App.css';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, query, orderBy, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 import PublicFeedbackForm from './pages/PublicFeedbackForm';
 import AdminLogin from './pages/AdminLogin';
 import AdminSubmissions from './pages/AdminSubmissions';
+import PasswordResetRequest from './pages/PasswordResetRequest';
+import SetNewPassword from './pages/SetNewPassword';
 
 export default function App() {
   const [adminSession, setAdminSession] = useState(null);
@@ -42,7 +44,7 @@ export default function App() {
   };
 
   const onPublicSubmitted = async () => {
-   
+    
     await fetchSubmissions();
   };
 
@@ -81,18 +83,23 @@ export default function App() {
             Admin
           </Link>
 
-          {adminSession ? (
-            <button
-              type="button"
-              className="btn btnGhost"
-              onClick={() => {
-                setAdminSession(null);
-                setToast({ type: 'success', message: 'Logged out successfully' });
-              }}
-            >
-              Logout
-            </button>
-          ) : null}
+           {adminSession ? (
+              <button
+                type="button"
+                className="btn btnGhost"
+                onClick={() => {
+                  signOut(auth).then(() => {
+                    setAdminSession(null);
+                    setToast({ type: 'success', message: 'Logged out successfully' });
+                  }).catch((err) => {
+                    console.error("Error signing out: ", err);
+                    setToast({ type: 'error', message: 'Logout failed' });
+                  });
+                }}
+              >
+                Logout
+              </button>
+            ) : null}
         </div>
       </div>
     </div>
@@ -139,9 +146,11 @@ export default function App() {
           }
         />
 
+        <Route path="/admin/reset-password" element={<PasswordResetRequest onToast={(t) => setToast(t)} />} />
+        <Route path="/admin/set-new-password" element={<SetNewPassword onToast={(t) => setToast(t)} />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
 }
-
