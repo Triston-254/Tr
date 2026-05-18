@@ -694,7 +694,7 @@ body {
   background: #fff;
   /* Ensure dropdown is not clipped by the horizontally scrollable table container */
   position: relative;
-  z-index: 20;
+  z-index: 1;
 }
 
 /* Prevent native select dropdown from being clipped in some mobile browsers */
