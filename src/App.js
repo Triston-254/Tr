@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Toast from './components/Toast';
 import { BrowserRouter, Navigate, Route, Routes, Link } from 'react-router-dom';
 import './App.css';
@@ -16,6 +16,8 @@ export default function App() {
   const [adminSession, setAdminSession] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [toast, setToast] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const isInitialCheck = useRef(true);
 
    const fetchSubmissions = async () => {
      if (!adminSession) return;
@@ -52,10 +54,12 @@ export default function App() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setAdminSession({ uid: user.uid, email: user.email });
-      } else {
+      } else if (!authLoading) {
+        // Only clear session if this is not the initial check
         setAdminSession(null);
         setSubmissions([]);
       }
+      setAuthLoading(false);
     });
     return unsubscribe;
   }, []);
@@ -119,7 +123,12 @@ export default function App() {
         <Route
           path="/admin"
           element={
-            adminSession ? (
+            authLoading ? (
+              <AdminLogin
+                onLogin={(session) => setAdminSession(session)}
+                onToast={(t) => setToast(t)}
+              />
+            ) : adminSession ? (
               <Navigate to="/admin/submissions" replace />
             ) : (
               <AdminLogin
@@ -133,7 +142,14 @@ export default function App() {
         <Route
           path="/admin/submissions"
           element={
-            adminSession ? (
+            authLoading ? (
+              <AdminSubmissions
+                submissions={submissions}
+                onUpdateStatus={updateStatus}
+                onRefresh={fetchSubmissions}
+                onToast={(t) => setToast(t)}
+              />
+            ) : adminSession ? (
               <AdminSubmissions
                 submissions={submissions}
                 onUpdateStatus={updateStatus}
