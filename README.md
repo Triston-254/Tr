@@ -1,70 +1,88 @@
-# Getting Started with Create React App
+# Feedback Management App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A web application for collecting and managing public feedback. Users can submit feedback through a public form, while administrators can log in to view, search, and update the status of submissions.
+
+## Features
+
+- **Public Feedback Form**: Anyone can submit feedback/complaints without authentication
+- **Admin Dashboard**: Secure area for managing submissions
+- **Status Tracking**: Submissions progress through statuses (In Progress → Done/Postponed/Refined)
+- **Search & Filter**: Admin can search submissions by ID, name, location, organization, or feedback content
+- **Password Reset**: Admins can reset passwords via email
+
+## How It Works
+
+### Architecture
+
+```
+src/
+├── App.js              # Main app with routing and auth state
+├── firebase.js         # Firebase configuration (Auth + Firestore)
+├── components/
+│   └── Toast.js        # Notification component
+├── pages/
+│   ├── PublicFeedbackForm.js   # Public submission form
+│   ├── AdminLogin.js           # Admin authentication
+│   ├── AdminSubmissions.js     # Submission management table
+│   ├── PasswordResetRequest.js # Password reset request
+│   └── SetNewPassword.js       # Password reset confirmation
+```
+
+### Data Flow
+
+1. **Public Form Submission**:
+   - User fills form with optional name, phone, location, organization, and required feedback
+   - Form validates required fields before submission
+   - Firestore transaction creates sequential ID and stores submission with "In Progress" status
+
+2. **Admin Authentication**:
+   - Firebase Authentication handles admin login/logout
+   - Auth state persists across page reloads
+   - Protected routes redirect unauthenticated users
+
+3. **Submission Management**:
+   - Admin views submissions in a searchable table
+   - Can update status via dropdown (Done, In Progress, Postponed, Refined)
+   - Real-time sync with Firestore
+
+### Firebase Collections
+
+- `submissions/{id}` - Feedback documents with fields: name, phone, location, organization, feedback, status, createdAt
+- `counters/submissions` - Tracks sequential ID counter
 
 ## Available Scripts
 
-In the project directory, you can run:
-
 ### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Runs the app in development mode at [http://localhost:3000](http://localhost:3000).
 
 ### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Launches the test runner in interactive watch mode.
 
 ### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Builds the app for production to the `build` folder.
 
 ### `npm run eject`
+Removes the build dependency and exposes all configuration files.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Setup
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Install dependencies:
+```bash
+npm install
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+2. Configure Firebase:
+   - Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+   - Enable Email/Password authentication
+   - Create a Firestore database
+   - Update `src/firebase.js` with your project credentials
+   - Create an admin user in Firebase Authentication
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+3. Run the development server:
+```bash
+npm start
+```
 
-## Learn More
+## Deployment
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The app builds to static files and can be deployed to any hosting service (Firebase Hosting, Netlify, Vercel, etc.).
